@@ -51,6 +51,22 @@ function formatTransaction(info){
     }
 }
 
+async function getApprovalsHistory(txId){
+    const walletContract = getContract(WALLET_CONTRACT, contract.abi);
+    const approvals = await walletContract.getApprovalHistory(txId);
+    const formattedApprovals = approvals.map(a => ({
+        approver: a.approver,
+        timestamp: a.timestamp.toNumber(),
+        date: new Date(a.timestamp.toNumber() * 1000).toISOString()
+    }));
+
+    return {
+        txId: txId,
+        totalApprovals: formattedApprovals.length,
+        approvals: formattedApprovals
+    };
+}
+
 module.exports={
     deposit,
     submitTransaction,
@@ -59,5 +75,6 @@ module.exports={
     executeTransaction,
     releasePayments,
     getBalance,
-    getTransactions
+    getTransactions,
+    getApprovalsHistory
 }

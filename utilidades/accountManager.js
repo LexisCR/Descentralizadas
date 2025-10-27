@@ -1,9 +1,9 @@
 require('dotenv').config({path:require('find-config')('.env')})
 const {ethers}=require('ethers')
-const {API_URL, PUBLIC_KEY, PRIVATE_KEYs}= process.env
+const {API_URL, PUBLIC_KEYS, PRIVATE_KEYS}= process.env
 
-const publickeys = PUBLIC_KEY.split(',')
-const privatekeys = PRIVATE_KEYs.split(',')
+const publickeys = PUBLIC_KEYS.split(',')
+const privatekeys = PRIVATE_KEYS.split(',')
 const provider = new ethers.providers.JsonRpcProvider(API_URL)
 
 function getWallet(account){

@@ -82,4 +82,16 @@ router.get('/balance', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+router.get('/approvals/:txId', async (req, res) => {
+    try {
+        const txId = req.params.txId;
+        const approvals = await walletController.getApprovalsHistory(txId);
+        res.json({ success: true, approvals });
+    } catch (error) {
+        console.error('Get approvals error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

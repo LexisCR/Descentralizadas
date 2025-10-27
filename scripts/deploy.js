@@ -20,7 +20,7 @@ async function multideploy(){
     const requireApprovals = 2;
     const multisignWallet = await ethers.getContractFactory("MultiSignPaymentWallet");
     const wallet = await multisignWallet.deploy(owners, requireApprovals,owners,partes);
-    console.log(wallet.address)
+    console.log("WALLET_ADDRESS: ",wallet.address)
 }
 multideploy().then(()=>process.exit(0)).catch((error)=>{
     console.error(error);

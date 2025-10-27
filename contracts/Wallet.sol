@@ -55,7 +55,7 @@ contract MultiSignPaymentWallet {
         //ContratoPagos
         require(_payees.length == _shares.length, "Length mismatch");
         require(_payees.length > 0, "No payees");
-        for (uint i=0;i<payees.length;i++){
+        for (uint i=0;i<_payees.length;i++){
             require(_payees[i]!=address(0),"Invalid address");
             require(_shares[i]>0, "Shares must be >0");
             payees.push(_payees[i]);
@@ -80,13 +80,35 @@ contract MultiSignPaymentWallet {
         );
         emit TransactionSubmitted(transactions.length-1,_to,amount);
     }
+
+    // Agregar al inicio, junto a tus variables y structs
+    struct ApprovalInfo {
+        address approver;
+        uint256 timestamp;
+    }
+
+    // Guardamos historial por txId
+    mapping(uint => ApprovalInfo[]) public approvalHistory;
+
     function approveTransaction(uint txId) external onlyOwner(){
         Transaction storage transaction = transactions[txId];
         require(!transaction.executed,"Already executed");
         require(!approvals[txId][msg.sender],"Already approved");
         approvals[txId][msg.sender] = true;
         transaction.approvalCount++;
+
+        // Guardamos histórico con timestamp
+        approvalHistory[txId].push(ApprovalInfo({
+            approver: msg.sender,
+            timestamp: block.timestamp
+        }));
+
         emit TransactionApproved(txId, msg.sender);
+    }
+
+    // Nueva función para obtener historial completo de aprobaciones
+    function getApprovalHistory(uint txId) public view returns (ApprovalInfo[] memory) {
+        return approvalHistory[txId];
     }
 
     function executeTransaction(uint txId) external onlyOwner nonReentrant{
