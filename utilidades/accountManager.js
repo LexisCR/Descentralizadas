@@ -8,7 +8,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL)
 
 function getWallet(account){
     if(account>=privatekeys.length){
-        throw new Error($`Account ${account} no existe`)
+        throw new Error(`Account ${account} no existe`)
     }
     return new ethers.Wallet(privatekeys[account],provider)
 }

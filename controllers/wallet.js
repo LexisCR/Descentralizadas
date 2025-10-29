@@ -4,6 +4,8 @@ const contract = require('../artifacts/contracts/Wallet.sol/MultiSignPaymentWall
 const {createTransaction,depositToContract, getContract} = require('../utilidades/contractHelper')
 const {WALLET_CONTRACT} = process.env
 
+const { provider, getWallet } = require('../utilidades/accountManager')
+
 async function sendTransaction(method,params,account){
     return await createTransaction(WALLET_CONTRACT,contract.abi,method,params,account)
 }
@@ -67,6 +69,47 @@ async function getApprovalsHistory(txId){
     };
 }
 
+function readContract() {
+    return getContract(WALLET_CONTRACT, contract.abi)
+}
+
+async function sendTx(method, params, account) {
+    return await createTransaction(WALLET_CONTRACT, contract.abi, method, params, account)
+}
+
+
+async function addProduct(name, price, account) {
+    const priceBN = ethers.BigNumber.from(price)
+    return await sendTx("addProduct", [name, priceBN], account)
+}
+
+async function buyProduct(productId, price, account) {
+    const wallet = getWallet(account)
+    const contractInstance = new ethers.Contract(WALLET_CONTRACT, contract.abi, wallet)
+    const tx = await contractInstance.buyProduct(
+        productId,
+        { value: ethers.utils.parseEther(price.toString()) }
+    )
+    await tx.wait()
+    return tx
+}
+
+async function disableProduct(productId, account) {
+    return await sendTx("disableProduct", [productId], account)
+}
+
+async function getAllProducts() {
+    const walletContract = readContract()
+    const products = await walletContract.getAllProducts()
+    return products.map(p => ({
+        id: p.id.toString(),
+        name: p.name,
+        price: ethers.utils.formatEther(p.price.toString()),
+        seller: p.seller,
+        active: p.active
+    }))
+}
+
 module.exports={
     deposit,
     submitTransaction,
@@ -76,5 +119,9 @@ module.exports={
     releasePayments,
     getBalance,
     getTransactions,
-    getApprovalsHistory
+    getApprovalsHistory,
+    addProduct,
+    buyProduct,
+    disableProduct,
+    getAllProducts
 }

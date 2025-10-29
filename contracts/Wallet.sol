@@ -138,4 +138,55 @@ contract MultiSignPaymentWallet {
     function getBalance() external view returns(uint256){
         return address(this).balance;
     }
+
+    struct Product {
+        uint id;
+        string name;
+        uint price;
+        address seller;
+        bool active;
+    }
+
+    uint public nextProductId;
+    mapping(uint => Product) public products;
+    mapping(address => uint[]) public purchases;
+
+    event ProductAdded(uint id, string name, uint price, address seller);
+    event ProductPurchased(uint id, address buyer, uint price);
+
+    function addProduct(string memory _name, uint _price) external onlyOwner {
+        require(_price > 0, "El precio debe ser mayor a 0");
+        uint productId = nextProductId++;
+        products[productId] = Product({
+            id: productId,
+            name: _name,
+            price: _price,
+            seller: msg.sender,
+            active: true
+        });
+        emit ProductAdded(productId, _name, _price, msg.sender);
+    }
+
+    function buyProduct(uint _productId) external payable nonReentrant {
+        Product storage product = products[_productId];
+        require(product.active, "Producto no disponible");
+        require(msg.value == product.price, "Monto incorrecto");
+
+        emit Deposit(msg.sender, msg.value);
+
+        purchases[msg.sender].push(_productId);
+        emit ProductPurchased(_productId, msg.sender, product.price);
+    }
+
+    function disableProduct(uint _productId) external onlyOwner {
+        products[_productId].active = false;
+    }
+
+    function getAllProducts() external view returns (Product[] memory) {
+        Product[] memory all = new Product[](nextProductId);
+        for (uint i = 0; i < nextProductId; i++) {
+            all[i] = products[i];
+        }
+        return all;
+    }
 }

@@ -16,7 +16,7 @@ const {ethers} = require("hardhat")
 
 async function multideploy(){
     const owners = ["0x59427DE366B815334d95267cE7968846Aa5Aa200","0x498a5083B953abD5bAb8136E0E4Fe2E22aeF42ba"]
-    const partes=["80","20"];
+    const partes=["50","50"];
     const requireApprovals = 2;
     const multisignWallet = await ethers.getContractFactory("MultiSignPaymentWallet");
     const wallet = await multisignWallet.deploy(owners, requireApprovals,owners,partes);

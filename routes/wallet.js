@@ -94,4 +94,46 @@ router.get('/approvals/:txId', async (req, res) => {
     }
 });
 
+router.post('/products', async (req, res) => {
+    try {
+        const { name, price, account } = req.body
+        const pricewei = ethers.utils.parseEther(price.toString())
+        const receipt = await walletController.addProduct(name, pricewei, account)
+        res.json({ success: true, message: 'Product added', receipt })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+})
+
+router.get('/products', async (_req, res) => {
+    try {
+        const products = await walletController.getAllProducts()
+        const active = products.filter(p => p.active)
+        res.json({ success: true, products: active })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+})
+
+router.post('/products/buy', async (req, res) => {
+    try {
+        const { productId, price, buyer } = req.body
+        const receipt = await walletController.buyProduct(productId, price, buyer)
+        res.json({ success: true, message: 'Product purchased', receipt })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+})
+
+
+router.post('/products/disable', async (req, res) => {
+    try {
+        const { productId, account } = req.body
+        const receipt = await walletController.disableProduct(productId, account)
+        res.json({ success: true, message: 'Product disabled', receipt })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+})
+
 module.exports = router;
